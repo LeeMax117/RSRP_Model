@@ -1,3 +1,7 @@
+## Description and competation link
+
+https://nokia.sharepoint.com/sites/CodeRallyBeijing/SitePages/Home.aspx
+
 ## week 1(6.3-6.7)
 
 * 调研传统RSRP方法
