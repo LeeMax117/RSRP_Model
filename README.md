@@ -2,6 +2,8 @@
 
 https://nokia.sharepoint.com/sites/CodeRallyBeijing/SitePages/Home.aspx
 
+https://www.kaggle.com/hzhao011/code-rally-2019/
+
 ## week 1(6.3-6.7)
 
 * 调研传统RSRP方法
