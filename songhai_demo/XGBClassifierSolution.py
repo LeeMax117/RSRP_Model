@@ -82,7 +82,7 @@ print("transfer list to ndarray")
 # create XGBClassifier model
 modelX = xgb.XGBClassifier(max_depth=8,
                           learning_rate=0.1,
-                          n_estimators=10,
+                          n_estimators=40,
                           silent=False,
                           objective='multi:softmax',
                           num_class=320)
@@ -106,10 +106,10 @@ print("X accuarcy: %.2f%%" % (accuracy*100.0))
 # create XGBClassifier model
 modelY = xgb.XGBClassifier(max_depth=8,
                           learning_rate=0.1,
-                          n_estimators=10,
+                          n_estimators=40,
                           silent=False,
                           objective='multi:softmax',
-                          num_class=320)
+                          num_class=160)
 
 # train model Y
 modelY.fit(trainInputlist, trainYlist)
