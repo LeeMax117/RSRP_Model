@@ -32,8 +32,8 @@ def f(x_pos, y_pos, v):
 fig = plt.figure()
 for ind in range(1, col_size+1):
     Z = f(X, Y, Z_full[:, ind-1])
-    X_line = np.linspace(0, 5, 318)
-    Y_line = np.linspace(0, 5, 157)
+    X_line = np.linspace(0, 5, x_max+1)  # x_max = 317
+    Y_line = np.linspace(0, 5, y_max+1)  # y_max = 156
     X_axis, Y_axis = np.meshgrid(X_line, Y_line)
     plt.subplot(row, col, ind)
     # print(X.shape, Y.shape, Z.shape, Z.transpose().shape)
