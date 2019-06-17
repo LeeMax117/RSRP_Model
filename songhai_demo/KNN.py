@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from sklearn import neighbors
+from sklearn import metrics
 
 
 # prepare data
@@ -15,12 +16,12 @@ def accuracy(predictions, labels):
     return np.mean(np.sqrt(np.sum((predictions-labels)**2, 1)))
 
 
-# knn regression
-knn_reg = neighbors.KNeighborsRegressor(8, weights='uniform', metric='euclidean')
-predictions = knn_reg.fit(offline_rsrp, offline_location).predict(online_rsrp)
-acc = accuracy(predictions, online_location)
-print(np.c_[online_location, predictions])
-print("accuracy: %f m" % acc)
+# # knn regression
+# knn_reg = neighbors.KNeighborsRegressor(8, weights='uniform', metric='euclidean')
+# predictions = knn_reg.fit(offline_rsrp, offline_location).predict(online_rsrp)
+# acc = accuracy(predictions, online_location)
+# print(np.c_[online_location, predictions])
+# print("accuracy: %f m" % acc)
 
 # # knn classification
 # labels = np.round(offline_location[:, 0] / 100.0) * 100 + np.round(offline_location[:, 1] / 100.0)
@@ -57,4 +58,5 @@ predictions = knn_reg.fit(offline_rsrp, offline_location).predict(online_rsrp)
 acc = accuracy(predictions, online_location)
 np.savetxt('pred.txt',predictions, fmt="%d")
 print(np.c_[online_location, predictions])
-print("accuracy: %f m" % acc)
+mse = metrics.mean_squared_error(online_location, predictions)
+print(mse)
