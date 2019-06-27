@@ -1,13 +1,26 @@
 import random
 import matplotlib.pyplot as plt
+import os
+import numpy as np
+
+Need_Compute_Ignore_Path = False
 
 
-energy = [1, 1, 1, 1] # ['N', 'S', 'E', 'W']
-x = random.randint(0, 300)
-y = random.randint(0, 150)
-ignore_path = set()
-path_list = list()
-delta = 3
+def load_or_compute_ignore_path(file):
+    if os.path.exists('ignore.csv'):
+        npdata = np.loadtxt('ignore.csv', skiprows=0, dtype=int, usecols=(0, 1), delimiter=',')
+        ignore_set = set(zip(npdata[:, 0], npdata[:, 1]))
+        return ignore_set
+    elif os.path.exists(file):
+        npdata = np.loadtxt(file, skiprows=1, dtype=int, usecols=(0, 1), delimiter=',')
+        max_x, max_y = np.max(npdata[:, 0]), np.max(npdata[:, 1])
+        allset = set([(i, j) for i in range(max_x) for j in range(max_y)])
+        ignore_set = allset.difference(set(zip(npdata[:, 0], npdata[:, 1])))
+        r, c = zip(*ignore_set)
+        new_data = np.c_[np.array(r), np.array(c)]
+        np.savetxt('ignore.csv', new_data, fmt='%d', delimiter=',')
+        return ignore_set
+
 
 def random_walk(n):
     global x, y
@@ -45,10 +58,24 @@ def random_walk(n):
             path_list.append((x, y))
 
 
+energy = [1, 1, 1, 1] # ['N', 'S', 'E', 'W']
+train_filename = 'train.csv'
+if Need_Compute_Ignore_Path:
+    ignore_path = load_or_compute_ignore_path(train_filename)
+else:
+    ignore_path = set()
+x = random.randint(0, 300)
+y = random.randint(0, 150)
+path_list = list()
+delta = 3
+# walk the blocks
 random_walk(206)
-X, Y = zip(*path_list)
-plt.figure()
-plt.xlim(0, 300)
-plt.ylim(0, 150)
-plt.scatter(X, Y)
-plt.show()
+if len(path_list) > 0:
+    X, Y = zip(*path_list)
+    plt.figure()
+    plt.xlim(-5, 320)
+    plt.ylim(-5, 167)
+    plt.scatter(X, Y)
+    plt.show()
+else:
+    print('no walks')
