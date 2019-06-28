@@ -89,4 +89,5 @@ if train_data is not None:
             return True
         return False
     df_filtered = train_data.select(df_filter)
-    print(df_filtered.shape, df_filtered)
+    print(df_filtered.shape)
+    df_filtered.to_csv('random_path.csv', sep=',', header=True, index=False)
