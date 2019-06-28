@@ -79,3 +79,14 @@ if len(path_list) > 0:
     plt.show()
 else:
     print('no walks')
+    
+# retrieve the RSRP data from train_data file.
+train_data = load_train_data('train.csv')
+if train_data is not None:
+    def df_filter(label):
+        row = train_data.iloc[label, :2]
+        if (row[0], row[1]) in path_list:
+            return True
+        return False
+    df_filtered = train_data.select(df_filter)
+    print(df_filtered.shape, df_filtered)
