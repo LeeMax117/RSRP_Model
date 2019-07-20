@@ -7,7 +7,7 @@ import torch.nn
 class DataSet:
     def __init__(self,
                  full_data,
-                 dtype=np.float32,
+                 dtype=np.float64,
                  inference = False,
                  seed=None):
         np.random.seed(seed)
@@ -31,10 +31,10 @@ class DataSet:
         del full_data[' y']
         # full_data = (full_data + 60.25)/(32.99) - 1
         # full_data.fillna()
-        full_data = (full_data + 126.23) / 36 - 1
-        full_data[full_data[:] == -1] = -1.2
+        full_data = (full_data + 126.23) / 72
+        # full_data[full_data[:] == -1] = -1.2
         train_data = np.array(full_data, dtype=dtype)
-        self._data = train_data.reshape(-1, 2, 1, 6)
+        self._data = train_data.reshape(-1, 1, 2, 6)
 
         self._inference = inference
 
@@ -122,17 +122,15 @@ class Net(torch.nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # for the first 1*1 and 1*6 conv
-        self.conv1 = torch.nn.Conv2d(2, 20, (1, 1))
-        self.BN1 = torch.nn.BatchNorm2d(20, 1, 6)
+        self.conv1 = torch.nn.Conv2d(1, 20, (2, 1))
         self.conv2 = torch.nn.Conv2d(20, 200, (1, 6))
 
         # the bypass of 1*6 and 1*1 conv
-        self.conv_1 = torch.nn.Conv2d(2,200,(1,6))
-        self.BN_1 = torch.nn.BatchNorm2d(200,1,1)
-        # self.conv_2 = torch.nn.Conv2d(20, 200, (1,1))
+        self.conv_1 = torch.nn.Conv2d(1,20,(1,6))
+        self.conv_2 = torch.nn.Conv2d(20, 200, (2,1))
 
         # full connected
-        self.BN2 = torch.nn.BatchNorm2d(400, 1, 1)
+        self.BN = torch.nn.BatchNorm2d(400, 1, 1)
         self.fc1 = torch.nn.Linear(400, 100)
         self.fc2 = torch.nn.Linear(100, 2)
 
@@ -150,13 +148,12 @@ class Net(torch.nn.Module):
         # x_1 = torch.relu(self.BN1(x_1))
         # use 1*6*200 to specify 3 position (x,y) and 3 signal and 1 posibility, 20 choice make 200
         # x = F.relu(self.conv2(x))
-        x_1 = self.conv2(x_1)
+        x_1 = torch.tanh(self.conv2(x_1))
         x_2 = torch.relu(self.conv_1(x))
         # x_2 = torch.relu(self.BN_1(x_2))
-        # x_2 = self.conv_2(x_2)
+        x_2 = torch.tanh(self.conv_2(x_2))
         x = torch.cat((x_1,x_2),1)
-        x = torch.relu(x)
-        # x = torch.relu(self.BN2(x))
+        # x = torch.relu(self.BN(x))
         x = x.view(-1, self.num_flat_features(x))
         # x = F.relu(self.fc1(x))
         x = torch.tanh(self.fc1(x))

@@ -13,32 +13,32 @@ from utils import *
 full_data = pd.read_csv("D:\Work\AI_competation\yuyang_Demo\\train_new.csv")
 train_data = DataSet(full_data)
 
-def val_in_test_set(epoch_num):
+def val_in_test_set():
     # load test set and predict
     test_full = pd.read_csv("D:\Work\AI_competation\dataset\\sample_submission.csv")
     test = DataSet(test_full)
 
     while test.epochs_completed == 0:
-        test_data, test_label = test.next_batch(100, is_training=False)
+        test_data, test_label = test.next_batch(test.num_examples, is_training=False)
         inputs = Variable(torch.Tensor(test_data))
         outputs = net(inputs)
         ground_truth = Variable(torch.Tensor(test_label))
 
-        try:
-            predict = torch.cat((predict, outputs), 0)
-            labels = torch.cat((labels, ground_truth), 0)
-        except NameError:
-            predict = outputs
-            labels = ground_truth
-
+    predict = outputs
+    labels = ground_truth
     MSE_score = criterion(predict, labels)
     np_outputs = outputs.detach().numpy()
     print('last outputs:(%.3f,%.3f), last ground truth:(%.3f,%.3f)' % \
           (np_outputs[-1][0], np_outputs[-1][1], test_label[-1][0], test_label[-1][1]))
     print('MSE_score:', MSE_score)
 
+    # trans the predict and test_label to numpy
     predict = predict.detach().numpy()
     test_label = labels.detach().numpy()
+
+    return MSE_score,predict,test_label
+
+def draw_scatter(epoch_num, MSE_score,predict,test_label):
     # plot the result
     x_label = test_label[:, 0]
     y_label = test_label[:, 1]
@@ -46,29 +46,32 @@ def val_in_test_set(epoch_num):
     x_pre = predict[:, 0]
     y_pre = predict[:, 1]
 
-    plt.scatter(x_label, y_label)
-    plt.scatter(x_pre, y_pre)
+    plt.scatter(x_label, y_label,linewidths=0.5)
+    plt.scatter(x_pre, y_pre,linewidths=0.5)
     xlabel('x')
     ylabel('y')
     title('%d epochs'%(epoch_num))
     text(150, 80,'MSE_score:%.3f'%(MSE_score),fontsize=15)
     plt.show()
 
-    return MSE_score
-
 net = Net()
 # define loss
 
+# load the current best model
+ckpt_path = 'D:\Work\AI_competation\yuyang_Demo\ckpt\\best_model'
+net.load_state_dict(torch.load(ckpt_path))
+
 criterion = torch.nn.MSELoss()
-lr = 0.01
-batch_size = 50
+lr = 3e-4
+batch_size = 512
 # create your optimizer
-for epoch in range(30):  # loop over the dataset multiple times
+best_score, predict, test_label = val_in_test_set()
+for epoch in range(10000):  # loop over the dataset multiple times
 
     optimizer = optim.Adam(net.parameters(), lr=lr)
     current_epoch = train_data.epochs_completed
     steps = 0
-    print('epoch completed:%d , learning_rate: %.3f'%(current_epoch,lr))
+    print('epoch completed:%d , learning_rate: %.5f'%(current_epoch,lr))
 
     while current_epoch == train_data.epochs_completed:
         # wrap them in Variable
@@ -86,7 +89,7 @@ for epoch in range(30):  # loop over the dataset multiple times
         for param in net.parameters():
             l1_loss += torch.sum(abs(param))
             l2_loss += torch.sum(param ** 2)
-        total_loss = loss + (7e-2) * l2_loss
+        total_loss = loss + (3e-4) * l2_loss
         # total_loss = loss
         total_loss.backward()
         optimizer.step()
@@ -104,17 +107,21 @@ for epoch in range(30):  # loop over the dataset multiple times
     print('last outputs:(%.3f,%.3f), last ground truth:(%.3f,%.3f)' % \
           (np_outputs[-1][0], np_outputs[-1][1], labels[-1][0], labels[-1][1]))
     print('####################################')
-    batch_size *= 1.0
-    lr = lr * 0.9
-    test_score = val_in_test_set(current_epoch)
-    try:
-        if test_score < best_score:
-            best_score = test_score
-            torch.save(net.state_dict(), 'D:\Work\AI_competation\yuyang_Demo\ckpt\\best_model')
-            print('**********model saved*************')
-    except NameError:
+    # batch_size *= 1.0
+    '''
+    lr = lr * 0.99
+    if current_epoch > 30:
+        if lr > 3e-5:
+            lr = lr * 0.999
+        else:
+            lr = 3e-5
+    '''
+    test_score, predict, test_label = val_in_test_set()
+    if test_score < best_score:
         best_score = test_score
         torch.save(net.state_dict(), 'D:\Work\AI_competation\yuyang_Demo\ckpt\\best_model')
+        print('**********model saved*************')
+        draw_scatter(current_epoch, test_score, predict, test_label)
 
 print('Finished Training')
 
