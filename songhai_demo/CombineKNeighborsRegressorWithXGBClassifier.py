@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_squared_error
 
+
 # define a drop mapper.
 class DropMapper(object):
     curdf = None
@@ -141,6 +142,7 @@ accuracy = accuracy_score(Test_YList, Pred_YList)
 print("XGB Y accuarcy: %.2f%%" % (accuracy*100.0))
 
 # draw real and predict points
+plt.figure()
 plt.scatter(Pred_XList, Pred_YList, linewidths=0)
 plt.scatter(Test_XList, Test_YList, linewidths=0)
 plt.ylabel('XGB real and predict')
@@ -149,7 +151,7 @@ plt.show()
 # create predict XY list
 Pred_XYList = []
 for index in range(0, test_num):
-    tmp_list = []
+    tmp_list = list()
     tmp_list.append(Pred_XList[index])
     tmp_list.append(Pred_YList[index])
     Pred_XYList.append(tmp_list)
@@ -157,7 +159,7 @@ for index in range(0, test_num):
 # create real XY list
 Real_XYList = []
 for index in range(0, test_num):
-    tmp_list = []
+    tmp_list = list()
     tmp_list.append(Test_XList[index])
     tmp_list.append(Test_YList[index])
     Real_XYList.append(tmp_list)
@@ -171,7 +173,7 @@ print("XGB XY MSE: %.2f" % MSE_XY)
 KNN_Point_Cnt = len(online_location)
 print("KNN Point Cnt: %d" % KNN_Point_Cnt)
 for index in range(0, KNN_Point_Cnt):
-    tmp_list = []
+    tmp_list = list()
     tmp_list.append(knn_preds[index][0])
     tmp_list.append(knn_preds[index][1])
     Pred_XList.append(knn_preds[index][0])
@@ -179,7 +181,7 @@ for index in range(0, KNN_Point_Cnt):
     Pred_XYList.append(tmp_list)
 
 for index in range(0, KNN_Point_Cnt):
-    tmp_list = []
+    tmp_list = list()
     tmp_list.append(online_location[index][0])
     tmp_list.append(online_location[index][1])
     Test_XList.append(online_location[index][0])
@@ -194,6 +196,7 @@ Total_MSE_XY = mean_squared_error(Real_XYList, Pred_XYList)
 print("Total XY MSE: %.2f" % Total_MSE_XY)
 
 # draw total real and predict points
+plt.figure()
 plt.scatter(Pred_XList, Pred_YList, linewidths=0)
 plt.scatter(Test_XList, Test_YList, linewidths=0)
 plt.ylabel('Total real and predict')
